@@ -9,7 +9,7 @@ public class PlayerMov : MonoBehaviour
     private Rigidbody2D _rb;
     private Animator _animator;
     public Vector3 LastFramePos;
-    public bool isMoving, movingBackward, secondTurnAnimation;
+    public bool isMoving, movingBackward, secondTurnAnimation, isDrifting, isDriftingLeft, isDriftingRight;
     public float movVer, movHor;
     private float _tempTurnSpeed;
     private SpriteRenderer _spriteRenderer;
@@ -24,7 +24,10 @@ public class PlayerMov : MonoBehaviour
     {
         movHor = Input.GetAxis("Horizontal");
         movVer = Input.GetAxis("Vertical");
-        _spriteRenderer.flipX = movHor > 0.01 ? true : false;
+        if (!isDrifting)
+        {
+            _spriteRenderer.flipX = movHor > 0.01 ? true : false;
+        }
         //    turnSpeed = secondTurnAnimation == false ? _tempTurnSpeed : _tempTurnSpeed - _tempTurnSpeed / 4;
 
         Acceleration();
@@ -46,7 +49,7 @@ public class PlayerMov : MonoBehaviour
 
         CalculateSpeed();
         MoveBackward();
-
+        Drift();
         _animator.SetFloat("Horizontal", Mathf.Abs(movHor));
         _animator.SetBool("isMoving", isMoving);
         _animator.SetBool("SecondTurnAnimation", secondTurnAnimation);
@@ -58,7 +61,7 @@ public class PlayerMov : MonoBehaviour
     //drift
     private void Acceleration()
     {
-        if (speed < maxSpeed - 1)
+        if (speed < maxSpeed - 4)
         {
             secondTurnAnimation = false;
             turningTime = 0;
@@ -101,7 +104,10 @@ public class PlayerMov : MonoBehaviour
             turningTime += Time.deltaTime;
             if (speed > speed / 2 && secondTurnAnimation)
             {
-                speed -= 0.1f * Time.deltaTime; //reduce speed by turning
+                if (!isDrifting)
+                {
+                    speed -= acceleration * 1.5f * Time.deltaTime; //reduce speed by turning
+                }
             }
             if (turningTime > changeTurningAnimationTime)
             {
@@ -117,7 +123,52 @@ public class PlayerMov : MonoBehaviour
 
     private void Drift()
     {
-
+        if (Input.GetKey(KeyCode.Space) && (movHor != 0 || isDrifting))
+        {
+            isDrifting = true;
+            if (isDrifting && !isDriftingRight && !isDriftingLeft)
+            {
+                if (movHor > 0.1)
+                {
+                    isDriftingRight = true;
+                    isDriftingLeft = false;
+                }
+                if (movHor < -0.1)
+                {
+                    isDriftingLeft = true;
+                    isDriftingRight = false;
+                }
+            }
+            if (isDriftingLeft)
+            {
+                if (movHor < -0.1f)
+                {
+                    turnSpeed = _tempTurnSpeed * 0.5f;
+                }
+                else if (movHor > 0.1f)
+                {
+                    turnSpeed = 20;
+                }
+            }
+            if (isDriftingRight)
+            {
+                if (movHor > 0.1f)
+                {
+                    turnSpeed = _tempTurnSpeed * 0.5f;
+                }
+                else if (movHor < -0.1f)
+                {
+                    turnSpeed = 20;
+                }
+            }
+        }
+        else
+        {
+            isDrifting = false;
+            isDriftingRight = false;
+            isDriftingLeft = false;
+            turnSpeed = _tempTurnSpeed;
+        }
     }
     private void CalculateSpeed()
     {
