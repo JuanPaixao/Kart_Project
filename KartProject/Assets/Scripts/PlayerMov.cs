@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerMov : MonoBehaviour
 {
-    public float turnSpeed, maxSpeed, speed, actualMovementSpeed, acceleration, deacceleration, brakeForce;
+    public float turnSpeed, maxSpeed, speed, actualMovementSpeed, acceleration, deacceleration, brakeForce, driftSpeed;
     public float turningTime, changeTurningAnimationTime;
     private Rigidbody2D _rb;
     private Animator _animator;
@@ -27,6 +27,14 @@ public class PlayerMov : MonoBehaviour
         if (!isDrifting)
         {
             _spriteRenderer.flipX = movHor > 0.01 ? true : false;
+        }
+        if (speed >= maxSpeed + driftSpeed)
+        {
+            speed = maxSpeed + driftSpeed;
+        }
+        if (speed >= maxSpeed)
+        {
+            speed -= (movVer + deacceleration / 2) * Time.deltaTime; //deacceleration
         }
         //    turnSpeed = secondTurnAnimation == false ? _tempTurnSpeed : _tempTurnSpeed - _tempTurnSpeed / 4;
 
@@ -78,7 +86,7 @@ public class PlayerMov : MonoBehaviour
         {
             if (speed > 0)
             {
-                speed -= (movVer + deacceleration) * Time.deltaTime; //braking
+                speed -= (movVer + deacceleration) * Time.deltaTime; //deacceleration
                 if (speed <= 0.2)
                 {
                     speed = 0;
@@ -90,7 +98,7 @@ public class PlayerMov : MonoBehaviour
 
     private void Brake()
     {
-        speed -= (movVer + brakeForce) * Time.deltaTime;
+        speed -= (movVer + brakeForce) * Time.deltaTime; // braking
         if (speed <= 0.2)
         {
             speed = 0;
@@ -143,32 +151,42 @@ public class PlayerMov : MonoBehaviour
             {
                 if (movHor < -0.1f)
                 {
-                    turnSpeed = _tempTurnSpeed * 0.5f;
+                    turnSpeed = _tempTurnSpeed * 0.55f;
                 }
                 else if (movHor > 0.1f)
                 {
-                    turnSpeed = 20;
+                    turnSpeed = 0;
                 }
             }
             if (isDriftingRight)
             {
                 if (movHor > 0.1f)
                 {
-                    turnSpeed = _tempTurnSpeed * 0.5f;
+                    turnSpeed = _tempTurnSpeed * 0.55f;
                 }
                 else if (movHor < -0.1f)
                 {
-                    turnSpeed = 20;
+                    turnSpeed = 0;
                 }
             }
         }
         else
         {
-            isDrifting = false;
-            isDriftingRight = false;
-            isDriftingLeft = false;
-            turnSpeed = _tempTurnSpeed;
+            if (isDrifting)
+            {
+                FinishDrift();
+            }
         }
+    }
+
+    private void FinishDrift()
+    {
+        isDrifting = false;
+        isDriftingRight = false;
+        isDriftingLeft = false;
+        turnSpeed = _tempTurnSpeed;
+        speed += driftSpeed;
+        Debug.Log("lll");
     }
     private void CalculateSpeed()
     {

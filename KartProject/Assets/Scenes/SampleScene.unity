@@ -820,12 +820,16 @@ MonoBehaviour:
   acceleration: 4
   deacceleration: 8
   brakeForce: 15
+  driftSpeed: 5
   turningTime: 0
   changeTurningAnimationTime: 0.5
   LastFramePos: {x: 0, y: 0, z: 0}
   isMoving: 0
   movingBackward: 0
   secondTurnAnimation: 0
+  isDrifting: 0
+  isDriftingLeft: 0
+  isDriftingRight: 0
   movVer: 0
   movHor: 0
 --- !u!61 &1344594462
