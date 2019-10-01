@@ -13,6 +13,8 @@ public class PlayerMov : MonoBehaviour
     public float movVer, movHor;
     private float _tempTurnSpeed;
     private SpriteRenderer _spriteRenderer;
+    public int driftBoost;
+    public float timeToDriftBoost, actualTimeToDriftBoost;
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -20,13 +22,17 @@ public class PlayerMov : MonoBehaviour
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         _tempTurnSpeed = turnSpeed;
     }
+    private void Start()
+    {
+        actualTimeToDriftBoost = 0;
+    }
     private void Update()
     {
         movHor = Input.GetAxis("Horizontal");
         movVer = Input.GetAxis("Vertical");
         if (!isDrifting)
         {
-            _spriteRenderer.flipX = movHor > 0.01 ? true : false;
+            _spriteRenderer.flipX = movHor > 0.001 ? true : false;
         }
         if (speed >= maxSpeed + driftSpeed)
         {
@@ -36,17 +42,17 @@ public class PlayerMov : MonoBehaviour
         {
             speed -= (movVer + deacceleration / 2) * Time.deltaTime; //deacceleration
         }
+
         //    turnSpeed = secondTurnAnimation == false ? _tempTurnSpeed : _tempTurnSpeed - _tempTurnSpeed / 4;
 
         Acceleration();
 
-        if (isMoving)
+        if (isMoving || isDrifting)
         {
             if (movVer < 0 && speed > 0)
             {
                 Brake();
             }
-
             Turning();
         }
         else
@@ -57,11 +63,20 @@ public class PlayerMov : MonoBehaviour
 
         CalculateSpeed();
         MoveBackward();
-        Drift();
+
+        if (speed >= maxSpeed - 2)
+        {
+            Drift();
+        }
+        //  else
+        //  {
+        //   isDrifting = false;
+        //   driftBoost = 0;
+        //  FinishDrift();
+        //}
         _animator.SetFloat("Horizontal", Mathf.Abs(movHor));
         _animator.SetBool("isMoving", isMoving);
         _animator.SetBool("SecondTurnAnimation", secondTurnAnimation);
-
 
     }
     //se fazer curva por X tempo, dimuinuir a turn speed (drift(?))
@@ -114,7 +129,7 @@ public class PlayerMov : MonoBehaviour
             {
                 if (!isDrifting)
                 {
-                    speed -= acceleration * 1.5f * Time.deltaTime; //reduce speed by turning
+                    speed -= acceleration * 1.25f * Time.deltaTime; //reduce speed by turning without drift
                 }
             }
             if (turningTime > changeTurningAnimationTime)
@@ -131,9 +146,31 @@ public class PlayerMov : MonoBehaviour
 
     private void Drift()
     {
-        if (Input.GetKey(KeyCode.Space) && (movHor != 0 || isDrifting))
+        if (Input.GetKeyDown(KeyCode.Space) || !isDrifting)
         {
             isDrifting = true;
+            _animator.SetBool("isDrifting", isDrifting);
+        }
+        if (Input.GetKeyUp(KeyCode.Space) && actualTimeToDriftBoost < 1 && isDrifting)
+        {
+            FinishDrift();
+            speed -= 5;
+            //fumaça preta sinalizando falha
+        }
+        if (Input.GetKey(KeyCode.Space) && (/*movHor != 0 ||*/ isDrifting))
+        {
+            //boost
+            actualTimeToDriftBoost += Time.deltaTime;
+            if (actualTimeToDriftBoost >= timeToDriftBoost)
+            {
+                driftBoost = 1;
+            }
+            else
+            {
+                driftBoost = 0;
+            }
+            //end boost
+
             if (isDrifting && !isDriftingRight && !isDriftingLeft)
             {
                 if (movHor > 0.1)
@@ -151,22 +188,22 @@ public class PlayerMov : MonoBehaviour
             {
                 if (movHor < -0.1f)
                 {
-                    turnSpeed = _tempTurnSpeed * 0.55f;
+                    turnSpeed = _tempTurnSpeed * 0.65f;
                 }
                 else if (movHor > 0.1f)
                 {
-                    turnSpeed = 0;
+                    turnSpeed = _tempTurnSpeed * 0.1f;
                 }
             }
             if (isDriftingRight)
             {
                 if (movHor > 0.1f)
                 {
-                    turnSpeed = _tempTurnSpeed * 0.55f;
+                    turnSpeed = _tempTurnSpeed * 0.65f;
                 }
                 else if (movHor < -0.1f)
                 {
-                    turnSpeed = 0;
+                    turnSpeed = _tempTurnSpeed * 0.1f;
                 }
             }
         }
@@ -185,8 +222,20 @@ public class PlayerMov : MonoBehaviour
         isDriftingRight = false;
         isDriftingLeft = false;
         turnSpeed = _tempTurnSpeed;
-        speed += driftSpeed;
-        Debug.Log("lll");
+        _animator.SetBool("isDrifting", isDrifting);
+
+        if (driftBoost >= 1)
+        {
+            speed += driftSpeed;
+            driftBoost = 0;
+            actualTimeToDriftBoost = 0;
+        }
+        else
+        {
+            driftBoost = 0;
+            actualTimeToDriftBoost = 0;
+        }
+
     }
     private void CalculateSpeed()
     {
