@@ -15,11 +15,13 @@ public class PlayerMov : MonoBehaviour
     private SpriteRenderer _spriteRenderer;
     public int driftBoost;
     public float timeToDriftBoost, actualTimeToDriftBoost;
+    private GameManager _gameManager;
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _animator = GetComponentInChildren<Animator>();
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        _gameManager = FindObjectOfType<GameManager>();
         _tempTurnSpeed = turnSpeed;
     }
     private void Start()
@@ -30,20 +32,19 @@ public class PlayerMov : MonoBehaviour
     {
         movHor = Input.GetAxis("Horizontal");
         movVer = Input.GetAxis("Vertical");
+        _gameManager.SetSpeedUI(speed);
         if (!isDrifting)
         {
             _spriteRenderer.flipX = movHor > 0.001 ? true : false;
         }
-        if (speed >= maxSpeed + driftSpeed)
+        if (speed >= maxSpeed + driftSpeed * 2)
         {
-            speed = maxSpeed + driftSpeed;
+            speed = maxSpeed + driftSpeed * 2;
         }
         if (speed >= maxSpeed)
         {
             speed -= (movVer + deacceleration / 2) * Time.deltaTime; //deacceleration
         }
-
-        //    turnSpeed = secondTurnAnimation == false ? _tempTurnSpeed : _tempTurnSpeed - _tempTurnSpeed / 4;
 
         Acceleration();
 
@@ -161,11 +162,15 @@ public class PlayerMov : MonoBehaviour
         {
             //boost
             actualTimeToDriftBoost += Time.deltaTime;
-            if (actualTimeToDriftBoost >= timeToDriftBoost)
+            if (actualTimeToDriftBoost >= timeToDriftBoost && actualTimeToDriftBoost <= timeToDriftBoost * 2)
             {
                 driftBoost = 1;
             }
-            else
+            else if (actualTimeToDriftBoost >= timeToDriftBoost * 2)
+            {
+                driftBoost = 2;
+            }
+            else if (actualTimeToDriftBoost < 1)
             {
                 driftBoost = 0;
             }
@@ -224,13 +229,21 @@ public class PlayerMov : MonoBehaviour
         turnSpeed = _tempTurnSpeed;
         _animator.SetBool("isDrifting", isDrifting);
 
-        if (driftBoost >= 1)
+        if (driftBoost >= 1 && driftBoost < 2)
         {
             speed += driftSpeed;
             driftBoost = 0;
             actualTimeToDriftBoost = 0;
+            Debug.Log("boost1");
         }
-        else
+        else if (driftBoost >= 2)
+        {
+            speed += driftSpeed * 1.5f;
+            driftBoost = 0;
+            actualTimeToDriftBoost = 0;
+            Debug.Log("boost2");
+        }
+        else if (driftBoost < 1)
         {
             driftBoost = 0;
             actualTimeToDriftBoost = 0;
