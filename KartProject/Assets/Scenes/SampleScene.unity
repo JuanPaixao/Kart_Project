@@ -396,7 +396,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -8.700012, y: 24.899994}
+  m_AnchoredPosition: {x: -8.700012, y: 24.900024}
   m_SizeDelta: {x: 131.4, y: 53.35}
   m_Pivot: {x: 1, y: 0}
 --- !u!1 &659521152
@@ -1048,14 +1048,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 354b978643526954493caf6a866e14d3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  turnSpeed: 75
-  maxSpeed: 20
+  turnSpeed: 0
+  maxSpeed: 0
   speed: 0
   actualMovementSpeed: 0
-  acceleration: 4
-  deacceleration: 8
-  brakeForce: 15
-  driftSpeed: 5
+  acceleration: 0
+  deacceleration: 0
+  brakeForce: 0
+  driftSpeed: 0
   turningTime: 0
   changeTurningAnimationTime: 0.5
   LastFramePos: {x: 0, y: 0, z: 0}
@@ -1067,9 +1067,10 @@ MonoBehaviour:
   isDriftingRight: 0
   movVer: 0
   movHor: 0
-  driftBoost: 10
+  driftBoost: 0
   timeToDriftBoost: 1
   actualTimeToDriftBoost: 0
+  kartInfo: {fileID: 11400000, guid: e2bc8839aed6eac48aa167b47cd9815a, type: 2}
 --- !u!61 &1344594462
 BoxCollider2D:
   m_ObjectHideFlags: 0
