@@ -16,12 +16,19 @@ public class PlayerMov : MonoBehaviour
     public int driftBoost;
     public float timeToDriftBoost, actualTimeToDriftBoost;
     private GameManager _gameManager;
+    public KartData kartInfo;
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
         _animator = GetComponentInChildren<Animator>();
         _spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         _gameManager = FindObjectOfType<GameManager>();
+        turnSpeed = kartInfo.turnSpeed;
+        maxSpeed = kartInfo.maxSpeed;
+        acceleration = kartInfo.acceleration;
+        deacceleration = kartInfo.deacceleration;
+        brakeForce = kartInfo.brakeForce;
+        driftSpeed = kartInfo.driftSpeed;
         _tempTurnSpeed = turnSpeed;
     }
     private void Start()
