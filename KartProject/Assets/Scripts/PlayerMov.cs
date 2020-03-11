@@ -168,7 +168,10 @@ public class PlayerMov : MonoBehaviour
         if (Input.GetKey(KeyCode.Space) && (/*movHor != 0 ||*/ isDrifting))
         {
             //boost
-            actualTimeToDriftBoost += Time.deltaTime;
+            if (movHor != 0)
+            {
+                actualTimeToDriftBoost += Time.deltaTime;
+            }
             if (actualTimeToDriftBoost >= timeToDriftBoost && actualTimeToDriftBoost <= timeToDriftBoost * 2)
             {
                 driftBoost = 1;
@@ -204,7 +207,7 @@ public class PlayerMov : MonoBehaviour
                 }
                 else if (movHor > 0.1f)
                 {
-                    turnSpeed = _tempTurnSpeed * 0.1f;
+                    turnSpeed = _tempTurnSpeed * 0.2f;
                 }
             }
             if (isDriftingRight)
@@ -215,7 +218,7 @@ public class PlayerMov : MonoBehaviour
                 }
                 else if (movHor < -0.1f)
                 {
-                    turnSpeed = _tempTurnSpeed * 0.1f;
+                    turnSpeed = _tempTurnSpeed * 0.2f;
                 }
             }
         }
